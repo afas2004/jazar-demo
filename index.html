@@ -122,6 +122,19 @@ details.more[open] > summary { border-bottom: 1px solid var(--line); }
 .forms .it { min-height: 48px; }
 footer { padding: 18px 16px 40px; font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
 footer a { color: inherit; }
+/* containers: each section is its own card */
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 1px 2px rgb(0 0 0 / .04); }
+.box.sec { padding: 12px 14px; display: grid; gap: 8px; }
+.box.list { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.box .chip { background: var(--page); }
+.note { font-size: 14px; color: var(--muted); }
+.wordcard { padding: 4px 14px 14px; display: grid; gap: 2px; }
+.wordcard .whole { font-size: 46px; }
+.gloss { text-align: center; font-size: 20px; font-weight: 700; line-height: 1.35; }
+.rootrow { display: flex; justify-content: space-between; align-items: center; }
+.k .grp { padding: 10px 14px 6px; border-bottom: 1px solid var(--line); }
+.k .grp + .it { border-top: 0; }
+.typed { font-size: 13px; }
 @media (prefers-reduced-motion: no-preference) { .page { animation: slide .18s ease-out; } @keyframes slide { from { transform: translateX(24px); opacity: .6; } } }
 </style>
 </head>
@@ -153,7 +166,6 @@ footer a { color: inherit; }
       <button class="clear" id="clear" type="button" aria-label="Kosongkan" hidden>×</button></label>
   </div></header>
   <main id="main"></main>
-  <footer id="foot"></footer>
 </div>
 <div class="page" id="page" hidden></div>
 <script>
@@ -168,13 +180,15 @@ const canon = s => [...(s || '').normalize('NFKC')].map(c => MAP[c] ?? c).join('
 const fold = s => s.replace(/[أإآٱ]/g, 'ا').replace(/[ؤئ]/g, 'ء');
 const key = s => fold(canon(s));
 
-function meaningLine(e, plural) {
+function plural(e) {   // PL1–PL4: a plural noun's Malay is doubled on its first word
+  const ms = e.ms || '';
+  if (!(e.pl && e.p === 'noun')) return ms;
+  const [w, ...rest] = ms.split(/(?=[ ;,])/);
+  return w.includes('-') ? ms : `${w}-${w}${rest.join('')}`;
+}
+function meaningLine(e) {
   if (e.ms) {
-    let ms = e.ms, extra = '';
-    if (plural && e.p === 'noun') {
-      const [w, ...rest] = ms.split(/(?=[ ;,])/);
-      if (!w.includes('-')) { extra = ` <small>tunggal: ${esc(ms)}</small>`; ms = `${w}-${w}${rest.join('')}`; }
-    }
+    const ms = plural(e), extra = ms !== e.ms ? ` <small>tunggal: ${esc(e.ms)}</small>` : '';
     return `<span class="ms">${esc(ms)}<span class="tag" title="Makna ini belum disemak oleh editor">draf</span>${extra}</span>`;
   }
   if (e.en) return `<span class="en"><span class="tag" style="margin:0 6px 0 0">EN</span>${esc(e.en)}</span>`;
@@ -190,11 +204,10 @@ function home() {
     <section class="welcome"><span class="big" aria-hidden="true">${ICON}</span>
       <h1>Jazar</h1><p>Kamus Arab–Melayu. Taip perkataan Arab tepat seperti dalam teks: dengan imbuhan, dengan atau tanpa baris.</p></section>
     <div class="pad">
-      <div class="lab">Cuba perkataan ini · Try these</div>
-      <div class="chips">${m.suggest.map(w => `<button class="chip" data-q="${esc(w)}">${esc(w)}</button>`).join('')}</div>
-      <div class="note"><b>Demo bukti konsep · Proof of concept</b>
-        <span>Senarai perkataan tetap: ${m.queries.toLocaleString('en')} bentuk perkataan sekolah dan kata dasarnya. Makna Melayu ialah draf dan masih disemak.</span>
-        <span>A fixed list of ${m.queries.toLocaleString('en')} school word forms. Every result is precomputed by the real Jazar engine; Malay meanings are drafts still under review.</span></div>
+      <section class="box sec"><div class="lab">Cuba perkataan ini</div>
+        <div class="chips">${m.suggest.map(w => `<button class="chip" data-q="${esc(w)}">${esc(w)}</button>`).join('')}</div></section>
+      <section class="box sec note"><b>Demo bukti konsep</b>
+        <span>${m.queries.toLocaleString('en')} bentuk perkataan sekolah, dicari oleh enjin Jazar yang sebenar. Makna Melayu masih draf.</span></section>
     </div>`;
 }
 
@@ -207,13 +220,19 @@ function parts(r, typed) {   // the typed word, whole, each attached part in its
   pre.forEach((p, n) => { html += `<span class="c${Math.min(n, 2)}">${esc(c.slice(i, i + p.t.length))}</span>`; i += p.t.length; });
   html += `<span class="cs">${esc(c.slice(i, c.length - X.length))}</span>`;
   if (X) html += `<span class="cx">${esc(c.slice(c.length - X.length))}</span>`;
-  const leg = [...pre.map((p, n) => [p, 'c' + Math.min(n, 2)]), ...suf.map(p => [p, 'cx'])]
-    .map(([p, cl]) => `<div><span>${esc(p.ms)} <small>· ${esc(p.en)}</small></span><span class="ar ${cl}">${esc(p.t)}</span></div>`).join('');
-  return `<div class="whole">${html}</div><div class="legend">${leg}</div>`;
+  // one Malay line in Malay word order, each piece in its part's colour: و ب … ال … ه → "dan dengan buku itu nya"
+  const word = s => s.split('/')[0].replace(/\(.*?\)/g, '').trim();
+  const bits = [];
+  pre.forEach((p, n) => { if (p.t !== 'ال') bits.push([`c${Math.min(n, 2)}`, word(p.ms)]); });
+  bits.push(['cs', r.ms ? plural(r) : (r.en || '…')]);
+  pre.forEach((p, n) => { if (p.t === 'ال') bits.push([`c${Math.min(n, 2)}`, 'itu']); });
+  suf.forEach(p => bits.push(['cx', word(p.ms)]));
+  const line = bits.map(([cl, t], i) => (t === 'nya' && i && r.ms ? '' : (i ? ' ' : '')) + `<span class="${cl}">${esc(t)}</span>`).join('');
+  return `<section class="box wordcard"><div class="whole">${html}</div><div class="gloss">${line}</div></section>`;
 }
 
 function row(r, i) {
-  return `<button class="it" data-open="${i}"><div class="row">${meaningLine(r, r.pl)}<span class="hw">${esc(r.d)}</span></div>
+  return `<button class="it" data-open="${i}"><div class="row">${meaningLine(r)}<span class="hw">${esc(r.d)}</span></div>
     <div class="sub"><span>${labels(r.lab)}</span>${r.form ? `<span class="mark">${esc(r.form)}</span>` : ''}</div></button>`;
 }
 
@@ -229,21 +248,17 @@ function show(text) {
   const many = words.length > 1 ? `<div class="help">Demo ini mencari satu perkataan sahaja: ${ar(typed)}. · One word at a time.</div>` : '';
   if (!hit) {
     $('#main').innerHTML = `<div class="pad">${many}
-      <div class="help">${ar(typed)} tiada dalam senarai demo.</div>
-      <div class="note"><b>Belum ada dalam demo ini · Not in this demo yet</b>
-        <span>Demo ini memuatkan ${IDX.meta.queries.toLocaleString('en')} perkataan tetap sahaja; aplikasi penuh mencari 2 juta bentuk perkataan.</span>
-        <span>This demo holds a fixed word list only; the full app searches 2 million word forms offline.</span></div>
-      <div class="lab">Cuba perkataan ini · Try these</div>
-      <div class="chips">${IDX.meta.suggest.map(w => `<button class="chip" data-q="${esc(w)}">${esc(w)}</button>`).join('')}</div></div>`;
+      <section class="box sec note"><b>${ar(typed)} belum ada dalam demo ini</b>
+        <span>Demo ini memuatkan ${IDX.meta.queries.toLocaleString('en')} perkataan sahaja; aplikasi penuh mencari 2 juta bentuk perkataan.</span></section>
+      <section class="box sec"><div class="lab">Cuba perkataan ini</div>
+        <div class="chips">${IDX.meta.suggest.map(w => `<button class="chip" data-q="${esc(w)}">${esc(w)}</button>`).join('')}</div></section></div>`;
     return;
   }
-  CURRENT = hit.r;
-  const main = CURRENT.filter(r => !r.fold), more = CURRENT.filter(r => r.fold);
+  CURRENT = hit.r;   // every reading in the engine's order (no folding: "Bacaan lain" is not approved)
   const n = CURRENT.length;
   $('#main').innerHTML = `<div class="pad">${many}${parts(CURRENT[0], typed)}
-      <div class="help">${n === 1 ? '1 bacaan' : n + ' bacaan'} untuk ${ar(typed)}${n > 1 ? '. Susunan ikut kemungkinan; pilih ikut makna.' : '.'}</div></div>
-    <div class="list">${main.map(r => row(r, CURRENT.indexOf(r))).join('')}</div>
-    ${more.length ? `<details class="more"><summary>Bacaan lain (${more.length}) ⌄</summary><div class="list">${more.map(r => row(r, CURRENT.indexOf(r))).join('')}</div></details>` : ''}`;
+      <div class="lab">${n === 1 ? '1 bacaan' : n + ' bacaan'}${n > 1 ? ' · pilih ikut makna' : ''}</div>
+      <div class="box list">${CURRENT.map((r, i) => row(r, i)).join('')}</div></div>`;
 }
 
 async function shard(id) {
@@ -287,9 +302,10 @@ function render(id, e, fam, ctx, tab) {
     const ms = e.ms.map((m, i) => `<div class="mbox"><div class="r1"><span class="n">${i + 1}</span><span class="w">${esc(m.ms)}</span><span class="tag" title="Makna ini belum disemak oleh editor">draf</span></div>
         ${m.more ? `<div class="s">juga: ${esc(m.more)}</div>` : ''}${m.en ? `<div class="s">EN · ${esc(m.en)}</div>` : ''}</div>`).join('');
     const en = !e.ms.length && e.en.length ? e.en.map((g, i) => `<div class="mbox"><div class="r1"><span class="n">${i + 1}</span><span class="tag" style="margin:0">EN</span><span class="w e">${esc(g)}</span></div></div>`).join('') : '';
-    const enMore = e.ms.length && e.en.length ? `<div class="lab">English</div><div class="help">${e.en.map(esc).join(' · ')}</div>` : '';
-    const root = e.root ? `<div class="lab">Kata dasar · root</div><div class="tiles">${[...e.root].map(c => `<span>${esc(c)}</span>`).join('')}</div>` : '';
-    body = `<div class="pad">${typed}${ms}${en}${!ms && !en ? '<div class="help">Makna belum ada dalam demo ini.</div>' : ''}${enMore}${root}</div>`;
+    const enMore = e.ms.length && e.en.length ? `<section class="box sec"><div class="lab">English</div><div class="help">${e.en.map(esc).join(' · ')}</div></section>` : '';
+    const root = e.root ? `<section class="box sec rootrow"><div class="lab">Kata dasar</div><div class="tiles">${[...e.root].map(c => `<span>${esc(c)}</span>`).join('')}</div></section>` : '';
+    body = `<div class="pad">${typed ? `<section class="box sec">${typed}</section>` : ''}
+      <div class="lab">Makna</div>${ms}${en}${!ms && !en ? '<div class="help">Makna belum ada dalam demo ini.</div>' : ''}${enMore}${root}</div>`;
   } else if (tab === 1 && isVerb) {
     const t = e.tasrif || {}, me = ctx && ctx.form;
     body = `<div class="pad"><div class="help">Tasrif asas: madhi, mudhari' dan amar (ma'lum).</div>
@@ -297,13 +313,13 @@ function render(id, e, fam, ctx, tab) {
       ${!e.tasrif ? '<div class="help">Tasrif tiada untuk kata ini.</div>' : ''}</div>`;
   } else if (tab === 1) {
     const f = e.forms || [];
-    body = f.length ? `<div class="list forms">${f.map(([l, d]) => `<div class="it"><div class="row"><span class="ms" style="font-size:15px;font-weight:600">${esc(l)}</span><span class="hw">${esc(d)}</span></div></div>`).join('')}</div>`
+    body = f.length ? `<div class="pad"><div class="box list forms">${f.map(([l, d]) => `<div class="it"><div class="row"><span class="ms" style="font-size:15px;font-weight:600">${esc(l)}</span><span class="hw">${esc(d)}</span></div></div>`).join('')}</div></div>`
       : `<div class="pad"><div class="help">Tiada bentuk lain dalam demo ini.</div></div>`;
   } else {
-    body = fam && fam.length ? fam.map(([g, items]) => `<div class="grp">${esc(g)}</div><div class="list k">${items.map(x => {
+    body = fam && fam.length ? '<div class="pad">' + fam.map(([g, items]) => `<section class="box list k"><div class="grp">${esc(g)}</div>${items.map(x => {
         const m = x.ms ? `<span class="ms">${esc(x.ms)}</span>` : x.en ? `<span class="en">${esc(x.en)}</span>` : '';
         return `<button class="it" data-fam="${x.id}"${x.id == id ? ' disabled' : ''}><div class="row"><span>${m}${x.pat ? ` <span class="sm">· ${x.id && x.pat ? ar(x.pat) : ''}</span>` : ''}</span><span class="hw">${lit(x.d, e.root)}</span></div></button>`;
-      }).join('')}</div>`).join('') : `<div class="pad"><div class="help">Tiada kata dasar untuk kata ini.</div></div>`;
+      }).join('')}</section>`).join('') + '</div>' : `<div class="pad"><div class="help">Tiada kata dasar untuk kata ini.</div></div>`;
   }
   const pg = $('#page');
   pg.hidden = false;
@@ -334,10 +350,6 @@ document.addEventListener('click', ev => {
 $('#q').addEventListener('input', e => show(e.target.value));
 $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
 $('#clear').addEventListener('click', () => { $('#q').value = ''; show(''); $('#q').focus(); });
-
-$('#foot').innerHTML = `<div><b>Jazar</b> · kamus Arab–Melayu luar talian (offline Arabic–Malay dictionary). Demo bukti konsep, November 2026.</div>
-  <div>Kredit · Credits: English meanings from CAMeL-Morph (CC BY 4.0) and English Wiktionary via kaikki.org (CC BY-SA 4.0). Some plural forms from English Wiktionary (CC BY-SA 4.0) and Qabas, SinaLab, Birzeit University (CC BY). Fonts: Amiri, Noto Naskh Arabic, Aref Ruqaa, Plus Jakarta Sans (SIL Open Font License).</div>
-  <div>The word data on this page is shared under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Malay meanings are drafts by the Jazar team, under review.</div>`;
 
 fetch('data/index.json').then(r => r.json()).then(d => {
   IDX = d;
