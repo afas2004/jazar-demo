@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jazar demo</title>
+<meta name="description" content="Jazar: kamus Arab–Melayu luar talian. Taip perkataan Arab tepat seperti dalam teks. Demo bukti konsep.">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri&family=Aref+Ruqaa:wght@700&family=Noto+Naskh+Arabic:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+:root {
+  --page: #fafafb; --card: #ffffff; --ink: #111113; --rest: #6f6f79; --muted: #5f5f69; --line: #e3e3e8;
+  --bar1: #2e2e35; --bar2: #0b0b0d; --onbar: #ffffff; --cell: #e6e6eb; --mark: #ffe9a6; --markink: #3a2a00;
+  --p1: #0f766e; --p2: #7c3aed; --p3: #b45309; --p4: #be123c;
+  --ui: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --ar: "Noto Naskh Arabic", "Amiri", "Traditional Arabic", serif;
+  --head: "Amiri", "Noto Naskh Arabic", "Traditional Arabic", serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #0f0f11; --card: #18181b; --ink: #f2f2f4; --rest: #a3a3ad; --muted: #a8a8b2; --line: #2b2b31; --cell: #2c2c33;
+  --mark: #5a4a12; --markink: #fff3c4; --p1: #2dd4bf; --p2: #a78bfa; --p3: #f59e0b; --p4: #fb7185; color-scheme: dark; } }
+:root[data-theme="dark"] { --page: #0f0f11; --card: #18181b; --ink: #f2f2f4; --rest: #a3a3ad; --muted: #a8a8b2; --line: #2b2b31;
+  --cell: #2c2c33; --mark: #5a4a12; --markink: #fff3c4; --p1: #2dd4bf; --p2: #a78bfa; --p3: #f59e0b; --p4: #fb7185; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--ink); font: 16px/1.5 var(--ui); -webkit-text-size-adjust: 100%; }
+.app { max-width: 560px; margin: 0 auto; min-height: 100vh; background: var(--page); position: relative; }
+.ar { font-family: var(--ar); direction: rtl; unicode-bidi: isolate; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.top { position: sticky; top: 0; z-index: 5; background: linear-gradient(180deg, var(--bar1), var(--bar2)); color: var(--onbar);
+  padding: max(10px, env(safe-area-inset-top)) 12px 12px; }
+.bar { display: flex; align-items: center; gap: 10px; min-height: 52px; }
+.ico { width: 40px; height: 40px; flex: none; display: block; }
+.ico svg, .big svg { width: 100%; height: 100%; display: block; border-radius: 22.37%; }
+.ico svg { box-shadow: 0 0 0 1px rgb(255 255 255 / .22); }
+.field { flex: 1; min-width: 0; display: flex; align-items: center; background: #fff; border-radius: 26px; height: 48px; padding: 0 6px 0 4px; }
+.field input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: #111113; font: 24px/1.2 var(--ar); direction: rtl; text-align: right; padding: 0 12px; height: 100%; }
+.field input::placeholder { font: 15px var(--ui); color: #6f6f79; direction: ltr; }
+.clear { width: 40px; height: 40px; border-radius: 50%; color: #5f5f69; font-size: 22px; display: grid; place-items: center; flex: none; }
+.clear[hidden] { display: none; }
+.back { font-size: 26px; width: 44px; height: 44px; display: grid; place-items: center; flex: none; color: var(--onbar); }
+.ttl { font-family: var(--head); font-size: 28px; line-height: 1.3; direction: rtl; unicode-bidi: isolate; }
+.pad { padding: 14px 16px; display: grid; gap: 12px; }
+.lab { font-size: 12.5px; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.help { font-size: 14.5px; color: var(--muted); }
+.help .ar { font-size: 1.3em; color: var(--ink); }
+.note { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 12px 14px; font-size: 14px; color: var(--muted); display: grid; gap: 4px; }
+.note b { color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; display: inline-flex; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 2px 16px; font: 22px/1.4 var(--ar); direction: rtl; color: var(--ink); }
+.chip:active { background: var(--cell); }
+.welcome { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 22px 16px 4px; }
+.big { width: 92px; height: 92px; }
+.big svg { box-shadow: 0 8px 24px -8px rgb(0 0 0 / .5); }
+.welcome h1 { margin: 6px 0 0; font-size: 24px; line-height: 1.2; letter-spacing: -0.01em; }
+.welcome p { margin: 0; color: var(--muted); font-size: 15px; max-width: 34ch; }
+.list { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.it { display: grid; gap: 2px; padding: 10px 16px; border-top: 1px solid var(--line); width: 100%; text-align: left; min-height: 56px; }
+.it:first-child { border-top: 0; }
+button.it:active { background: var(--cell); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.ms { font-size: 18px; font-weight: 800; }
+.ms small { font-weight: 500; font-size: 13px; color: var(--rest); }
+.en { font-size: 15px; font-weight: 600; }
+.none { font-size: 14px; color: var(--rest); font-weight: 500; }
+.hw { font-family: var(--ar); direction: rtl; unicode-bidi: isolate; font-size: 26px; line-height: 1.55; color: var(--ink); white-space: nowrap; }
+.sub { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--rest); flex-wrap: wrap; }
+.sub .ar { font-size: 1.35em; }
+.mark { font-family: var(--ar); direction: rtl; unicode-bidi: isolate; font-size: 20px; line-height: 1.5; background: var(--mark); color: var(--markink); border-radius: 6px; padding: 0 7px; margin-left: auto; }
+.tag { font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 0 7px; margin-left: 6px; vertical-align: 2px; }
+.whole { text-align: center; font-family: var(--ar); direction: rtl; font-size: 48px; line-height: 1.6; font-weight: 600; }
+.c0 { color: var(--p1); } .c1 { color: var(--p2); } .c2 { color: var(--p4); } .cx { color: var(--p3); } .cs { color: var(--ink); }
+.legend { display: grid; gap: 4px; }
+.legend div { display: flex; justify-content: space-between; align-items: center; font-size: 14.5px; }
+.legend .ar { font-size: 24px; line-height: 1.3; font-weight: 600; }
+.legend small { color: var(--rest); }
+details.more > summary { list-style: none; cursor: pointer; padding: 12px 16px; font-size: 14px; font-weight: 700; color: var(--muted); min-height: 44px; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more[open] > summary { border-bottom: 1px solid var(--line); }
+/* word page */
+.page { position: fixed; inset: 0; z-index: 10; background: var(--page); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.page .app { min-height: 100%; }
+.hd { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding: 10px 16px 2px; }
+.hd .word { font-family: var(--head); font-size: 46px; line-height: 1.5; direction: rtl; unicode-bidi: isolate; }
+.hd .pos { font-size: 13.5px; color: var(--muted); padding-bottom: 12px; display: grid; gap: 2px; }
+.hd .pos .ar { font-size: 1.35em; color: var(--ink); }
+.tabs { display: flex; border-bottom: 1px solid var(--line); position: sticky; top: 76px; background: var(--page); z-index: 4; }
+.tabs button { flex: 1; text-align: center; padding: 12px 0; font-size: 15px; font-weight: 700; color: var(--rest); min-height: 48px; }
+.tabs .on { color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+.mbox { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; display: grid; gap: 2px; }
+.mbox .r1 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.mbox .n { font-size: 13px; color: var(--muted); }
+.mbox .w { font-size: 20px; font-weight: 800; }
+.mbox .w.e { font-size: 17px; font-weight: 600; }
+.mbox .s { font-size: 14px; color: var(--rest); padding-left: 20px; }
+.typed { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.typed .mark { margin-left: 0; font-size: 19px; }
+.tiles { display: flex; gap: 6px; direction: rtl; }
+.tiles span { font: 600 22px/1 var(--ar); width: 40px; height: 40px; display: grid; place-items: center; background: var(--ink); color: var(--page); border-radius: 8px; }
+.grid { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.grid h3 { margin: 0; display: flex; justify-content: space-between; align-items: baseline; padding: 6px 10px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.grid h3 small { font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.grid h3 .ar { font-size: 20px; font-weight: 400; }
+.grid table { width: 100%; border-collapse: collapse; table-layout: fixed; direction: rtl; }
+.grid th { font: 400 13px var(--ar); color: var(--muted); padding: 2px 0; }
+.grid td { border-top: 1px solid var(--line); border-left: 1px solid var(--line); text-align: center; padding: 3px 2px; }
+.grid td:last-child { border-left: 0; }
+.grid td.r { font: 12.5px var(--ar); width: 20%; color: var(--muted); }
+.grid td small { display: block; font: 11px/1.3 var(--ar); color: var(--muted); }
+.grid td b { font: 400 18px/1.55 var(--ar); }
+.grid td.me { background: var(--cell); }
+.grp { font-size: 12.5px; font-weight: 700; color: var(--muted); padding: 14px 16px 4px; letter-spacing: .04em; text-transform: uppercase; }
+.k .hw { color: var(--rest); font-size: 24px; }
+.k .hw b { color: var(--ink); font-weight: 400; }
+.k .sm { font-size: 13px; color: var(--rest); }
+.k .ms { font-size: 16px; }
+.k .en { font-size: 14.5px; }
+.forms .it { min-height: 48px; }
+footer { padding: 18px 16px 40px; font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
+footer a { color: inherit; }
+@media (prefers-reduced-motion: no-preference) { .page { animation: slide .18s ease-out; } @keyframes slide { from { transform: translateX(24px); opacity: .6; } } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top"><div class="bar">
+    <span class="ico" aria-hidden="true"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><defs>
+    <radialGradient id="bgc0" gradientUnits="userSpaceOnUse" cx="512" cy="280" r="900"><stop offset="0" stop-color="#3b3b42"/><stop offset=".5" stop-color="#141416"/><stop offset="1" stop-color="#050506"/></radialGradient>
+    <linearGradient id="inkc0" gradientUnits="userSpaceOnUse" x1="0" y1="-140" x2="0" y2="140"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9dae0"/></linearGradient>
+    <linearGradient id="leafc0" gradientUnits="userSpaceOnUse" x1="300" y1="0" x2="560" y2="0"><stop offset="0" stop-color="#f4f4f6"/><stop offset="1" stop-color="#a9aab3"/></linearGradient>
+    <mask id="cutc0" maskUnits="userSpaceOnUse" x="-600" y="-600" width="1400" height="1200">
+      <path d="M-380 14C-262 -20 -52 -108 168 -134C262 -144 314 -86 314 -4C314 80 266 136 172 132C-30 120 -246 40 -380 14Z" fill="#fff"/>
+      <path d="M-254.3 -36.8L-254.0 -35.9L-253.6 -35.0L-253.3 -34.1L-252.9 -33.3L-252.6 -32.4L-252.2 -31.6L-251.8 -30.8L-251.5 -29.9L-251.1 -29.1L-250.7 -28.3L-250.4 -27.5L-250.0 -26.7L-249.6 -25.9L-249.2 -25.1L-248.8 -24.3L-248.4 -23.5L-248.0 -22.8L-247.7 -22.0L-247.3 -21.2L-246.9 -20.5L-246.5 -19.7L-246.1 -19.0L-245.7 -18.3L-245.3 -17.5L-244.9 -16.8L-244.5 -16.1L-244.1 -15.4L-243.7 -14.7L-243.4 -14.0L-243.0 -13.3L-242.6 -12.6L-242.2 -11.9L-241.8 -11.3L-241.4 -10.6L-241.1 -9.9L-240.7 -9.3L-240.3 -8.6L-239.9 -8.0L-239.6 -7.3L-239.2 -6.7L-238.9 -6.1L-238.5 -5.5L-238.2 -4.8L-237.8 -4.2L-237.5 -3.6L-237.1 -3.0L-236.8 -2.4L-236.5 -1.8L-235.5 -2.2L-235.7 -2.8L-235.9 -3.5L-236.1 -4.2L-236.3 -4.9L-236.5 -5.5L-236.7 -6.2L-236.9 -6.9L-237.1 -7.6L-237.3 -8.3L-237.5 -9.0L-237.7 -9.8L-237.9 -10.5L-238.2 -11.2L-238.4 -11.9L-238.6 -12.7L-238.8 -13.4L-239.1 -14.1L-239.3 -14.9L-239.5 -15.6L-239.8 -16.4L-240.0 -17.2L-240.2 -17.9L-240.5 -18.7L-240.7 -19.5L-240.9 -20.2L-241.2 -21.0L-241.4 -21.8L-241.6 -22.6L-241.8 -23.4L-242.1 -24.2L-242.3 -25.0L-242.5 -25.8L-242.7 -26.6L-243.0 -27.4L-243.2 -28.3L-243.4 -29.1L-243.6 -29.9L-243.8 -30.7L-244.0 -31.6L-244.2 -32.4L-244.4 -33.2L-244.6 -34.1L-244.8 -34.9L-245.0 -35.8L-245.2 -36.6L-245.3 -37.5L-245.5 -38.4L-245.7 -39.2Z" fill="#000"/><path d="M-165.3 -68.4L-164.8 -67.2L-164.3 -66.0L-163.9 -64.8L-163.4 -63.7L-163.0 -62.5L-162.5 -61.4L-162.1 -60.3L-161.6 -59.2L-161.2 -58.1L-160.8 -57.0L-160.3 -55.9L-159.9 -54.9L-159.5 -53.8L-159.1 -52.8L-158.7 -51.8L-158.3 -50.8L-157.9 -49.8L-157.5 -48.8L-157.1 -47.8L-156.7 -46.9L-156.3 -45.9L-155.9 -45.0L-155.5 -44.1L-155.1 -43.1L-154.7 -42.2L-154.4 -41.3L-154.0 -40.5L-153.6 -39.6L-153.2 -38.7L-152.9 -37.9L-152.5 -37.0L-152.1 -36.2L-151.8 -35.4L-151.4 -34.5L-151.1 -33.7L-150.7 -32.9L-150.3 -32.1L-150.0 -31.3L-149.6 -30.6L-149.3 -29.8L-148.9 -29.0L-148.6 -28.3L-148.2 -27.5L-147.9 -26.8L-147.5 -26.0L-147.2 -25.3L-146.8 -24.6L-146.5 -23.8L-145.5 -24.2L-145.7 -24.9L-145.8 -25.7L-146.0 -26.5L-146.1 -27.3L-146.3 -28.1L-146.4 -28.9L-146.6 -29.8L-146.7 -30.6L-146.9 -31.4L-147.0 -32.3L-147.2 -33.1L-147.4 -34.0L-147.5 -34.8L-147.7 -35.7L-147.8 -36.6L-148.0 -37.4L-148.2 -38.3L-148.3 -39.2L-148.5 -40.2L-148.7 -41.1L-148.8 -42.0L-149.0 -43.0L-149.2 -43.9L-149.4 -44.9L-149.6 -45.8L-149.7 -46.8L-149.9 -47.8L-150.1 -48.8L-150.3 -49.8L-150.5 -50.9L-150.7 -51.9L-150.9 -52.9L-151.1 -54.0L-151.3 -55.1L-151.6 -56.2L-151.8 -57.3L-152.0 -58.4L-152.2 -59.5L-152.4 -60.7L-152.7 -61.8L-152.9 -63.0L-153.2 -64.2L-153.4 -65.4L-153.7 -66.6L-153.9 -67.8L-154.2 -69.0L-154.5 -70.3L-154.7 -71.6Z" fill="#000"/><path d="M-195.7 53.2L-195.5 52.3L-195.3 51.5L-195.2 50.6L-195.0 49.7L-194.8 48.8L-194.7 48.0L-194.5 47.1L-194.3 46.3L-194.2 45.4L-194.0 44.6L-193.8 43.7L-193.7 42.9L-193.5 42.1L-193.3 41.3L-193.1 40.4L-193.0 39.6L-192.8 38.8L-192.6 38.0L-192.5 37.2L-192.3 36.4L-192.1 35.6L-192.0 34.8L-191.8 34.1L-191.6 33.3L-191.5 32.5L-191.3 31.8L-191.1 31.0L-191.0 30.2L-190.8 29.5L-190.6 28.8L-190.4 28.0L-190.3 27.3L-190.1 26.5L-189.9 25.8L-189.8 25.1L-189.6 24.4L-189.4 23.7L-189.2 23.0L-189.1 22.3L-188.9 21.6L-188.7 20.9L-188.6 20.2L-188.4 19.5L-188.2 18.8L-188.1 18.2L-187.9 17.5L-187.7 16.8L-187.5 16.2L-188.5 15.8L-188.8 16.4L-189.1 17.0L-189.4 17.6L-189.8 18.2L-190.1 18.9L-190.4 19.5L-190.8 20.1L-191.1 20.8L-191.4 21.4L-191.8 22.0L-192.1 22.7L-192.4 23.4L-192.7 24.0L-193.1 24.7L-193.4 25.4L-193.7 26.1L-194.1 26.7L-194.4 27.4L-194.7 28.1L-195.0 28.8L-195.4 29.5L-195.7 30.3L-196.0 31.0L-196.4 31.7L-196.7 32.4L-197.0 33.2L-197.4 33.9L-197.7 34.7L-198.0 35.4L-198.4 36.2L-198.7 36.9L-199.0 37.7L-199.4 38.5L-199.7 39.3L-200.0 40.1L-200.3 40.8L-200.7 41.6L-201.0 42.4L-201.3 43.3L-201.7 44.1L-202.0 44.9L-202.3 45.7L-202.7 46.5L-203.0 47.4L-203.3 48.2L-203.7 49.1L-204.0 49.9L-204.3 50.8Z" fill="#000"/><path d="M-84.6 93.1L-84.5 91.8L-84.3 90.6L-84.2 89.3L-84.0 88.1L-83.9 86.9L-83.8 85.7L-83.7 84.5L-83.6 83.3L-83.5 82.2L-83.4 81.0L-83.3 79.9L-83.2 78.8L-83.1 77.7L-83.0 76.6L-82.9 75.5L-82.8 74.4L-82.7 73.4L-82.7 72.3L-82.6 71.3L-82.5 70.3L-82.5 69.2L-82.4 68.2L-82.3 67.2L-82.3 66.2L-82.2 65.2L-82.2 64.3L-82.1 63.3L-82.1 62.3L-82.0 61.4L-82.0 60.4L-82.0 59.5L-81.9 58.5L-81.9 57.6L-81.9 56.7L-81.8 55.8L-81.8 54.8L-81.8 53.9L-81.7 53.0L-81.7 52.1L-81.7 51.2L-81.7 50.3L-81.6 49.4L-81.6 48.5L-81.6 47.6L-81.6 46.7L-81.5 45.9L-81.5 45.0L-81.5 44.1L-82.5 43.9L-82.7 44.8L-83.0 45.7L-83.2 46.5L-83.4 47.4L-83.6 48.2L-83.9 49.1L-84.1 50.0L-84.3 50.8L-84.6 51.7L-84.8 52.6L-85.0 53.5L-85.3 54.3L-85.5 55.2L-85.7 56.1L-86.0 57.0L-86.2 57.9L-86.5 58.8L-86.7 59.7L-86.9 60.6L-87.2 61.5L-87.4 62.5L-87.7 63.4L-88.0 64.3L-88.2 65.3L-88.5 66.2L-88.7 67.2L-89.0 68.2L-89.3 69.1L-89.5 70.1L-89.8 71.1L-90.1 72.1L-90.4 73.1L-90.7 74.1L-90.9 75.2L-91.2 76.2L-91.5 77.3L-91.8 78.3L-92.1 79.4L-92.4 80.5L-92.7 81.6L-93.1 82.7L-93.4 83.9L-93.7 85.0L-94.0 86.2L-94.4 87.3L-94.7 88.5L-95.0 89.7L-95.4 90.9Z" fill="#000"/><path d="M245.7 -111.3L245.4 -110.0L245.1 -108.8L244.8 -107.6L244.6 -106.4L244.3 -105.2L244.1 -104.1L243.9 -102.9L243.6 -101.8L243.4 -100.7L243.2 -99.7L243.0 -98.7L242.8 -97.6L242.6 -96.6L242.5 -95.7L242.3 -94.7L242.1 -93.8L242.0 -92.8L241.8 -91.9L241.7 -91.0L241.5 -90.2L241.4 -89.3L241.3 -88.5L241.2 -87.6L241.1 -86.8L241.0 -86.0L240.9 -85.2L240.8 -84.5L240.7 -83.7L240.6 -83.0L240.5 -82.2L240.4 -81.5L240.4 -80.8L240.3 -80.1L240.2 -79.3L240.2 -78.7L240.1 -78.0L240.0 -77.3L240.0 -76.6L239.9 -75.9L239.9 -75.3L239.8 -74.6L239.8 -74.0L239.7 -73.3L239.7 -72.7L239.6 -72.0L239.6 -71.4L239.6 -70.7L239.5 -70.1L240.5 -69.9L240.7 -70.5L240.9 -71.1L241.1 -71.7L241.3 -72.3L241.5 -73.0L241.7 -73.6L241.9 -74.2L242.2 -74.8L242.4 -75.4L242.6 -76.1L242.8 -76.7L243.0 -77.3L243.3 -78.0L243.5 -78.6L243.7 -79.3L243.9 -80.0L244.2 -80.7L244.4 -81.3L244.7 -82.0L244.9 -82.7L245.2 -83.5L245.4 -84.2L245.7 -84.9L245.9 -85.7L246.2 -86.4L246.5 -87.2L246.8 -88.0L247.0 -88.8L247.3 -89.6L247.6 -90.4L247.9 -91.3L248.2 -92.2L248.6 -93.0L248.9 -93.9L249.2 -94.9L249.6 -95.8L249.9 -96.8L250.3 -97.7L250.6 -98.7L251.0 -99.7L251.4 -100.8L251.8 -101.8L252.2 -102.9L252.6 -104.0L253.0 -105.2L253.4 -106.3L253.9 -107.5L254.3 -108.7Z" fill="#000"/><path d="M260.2 106.4L259.8 105.5L259.3 104.5L258.9 103.6L258.5 102.7L258.1 101.8L257.7 101.0L257.3 100.1L256.9 99.2L256.6 98.4L256.2 97.6L255.9 96.8L255.5 96.0L255.2 95.2L254.9 94.4L254.5 93.6L254.2 92.9L253.9 92.1L253.6 91.4L253.3 90.7L253.0 89.9L252.7 89.2L252.5 88.5L252.2 87.8L251.9 87.1L251.7 86.4L251.4 85.8L251.1 85.1L250.9 84.4L250.6 83.8L250.4 83.1L250.2 82.5L249.9 81.8L249.7 81.2L249.5 80.5L249.3 79.9L249.0 79.3L248.8 78.7L248.6 78.0L248.4 77.4L248.2 76.8L247.9 76.2L247.7 75.6L247.5 74.9L247.3 74.3L247.1 73.7L246.9 73.1L246.7 72.5L246.5 71.9L245.5 72.1L245.6 72.7L245.6 73.4L245.6 74.0L245.7 74.7L245.7 75.3L245.8 76.0L245.8 76.6L245.9 77.3L245.9 77.9L246.0 78.6L246.0 79.2L246.1 79.9L246.2 80.6L246.2 81.3L246.3 81.9L246.4 82.6L246.4 83.3L246.5 84.0L246.6 84.7L246.7 85.4L246.8 86.2L246.9 86.9L247.0 87.6L247.1 88.4L247.2 89.1L247.3 89.9L247.4 90.7L247.6 91.5L247.7 92.2L247.8 93.0L248.0 93.9L248.2 94.7L248.3 95.5L248.5 96.4L248.7 97.2L248.9 98.1L249.0 99.0L249.3 99.9L249.5 100.8L249.7 101.7L249.9 102.6L250.2 103.6L250.4 104.5L250.7 105.5L250.9 106.5L251.2 107.5L251.5 108.5L251.8 109.6Z" fill="#000"/>
+    </mask>
+    <mask id="carvec0" maskUnits="userSpaceOnUse" x="-600" y="-600" width="1400" height="1200">
+      <rect class="carveR" x="-460" y="-220" width="900" height="440" fill="url(#coverc0)"/>
+    </mask>
+    <linearGradient id="coverc0" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".1" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></linearGradient>
+    <filter id="liftc0" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000" flood-opacity="0"/></filter></defs>
+    <rect width="1024" height="1024" fill="url(#bgc0)"/>
+    <g transform="translate(512 512) rotate(-45) scale(1.55) translate(-96 14)"><g class="pull">
+      <g filter="url(#liftc0)">
+        <g class="leaves" fill="url(#leafc0)"><path d="M304.3 -19.9L309.3 -22.2L314.2 -24.4L319.0 -26.7L323.9 -29.0L328.6 -31.4L333.3 -33.7L338.0 -36.0L342.6 -38.3L347.2 -40.7L351.8 -43.0L356.3 -45.4L360.7 -47.8L365.1 -50.2L369.5 -52.6L373.8 -55.0L378.1 -57.5L382.4 -59.9L386.6 -62.4L390.8 -64.9L395.0 -67.4L399.1 -69.9L403.2 -72.4L407.3 -75.0L411.4 -77.6L415.4 -80.2L419.4 -82.8L423.3 -85.4L427.3 -88.1L431.2 -90.8L435.1 -93.5L439.0 -96.2L442.8 -99.0L446.6 -101.8L450.5 -104.6L454.2 -107.4L458.0 -110.3L461.8 -113.1L465.5 -116.1L469.3 -119.0L473.0 -122.0L476.7 -125.0L480.4 -128.0L484.1 -131.1L487.8 -134.2L491.5 -137.3L495.2 -140.5L498.9 -143.7L502.6 -146.9L497.4 -153.1L493.6 -150.1L489.8 -147.2L486.0 -144.2L482.1 -141.4L478.3 -138.5L474.5 -135.7L470.6 -133.0L466.8 -130.2L462.9 -127.5L459.1 -124.9L455.2 -122.2L451.3 -119.6L447.5 -117.0L443.6 -114.5L439.6 -112.0L435.7 -109.5L431.8 -107.0L427.8 -104.6L423.8 -102.1L419.8 -99.8L415.8 -97.4L411.8 -95.0L407.7 -92.7L403.6 -90.4L399.5 -88.2L395.4 -85.9L391.2 -83.7L387.1 -81.4L382.8 -79.2L378.6 -77.1L374.3 -74.9L370.0 -72.8L365.7 -70.6L361.3 -68.5L356.9 -66.4L352.4 -64.3L347.9 -62.3L343.4 -60.2L338.8 -58.1L334.2 -56.1L329.6 -54.1L324.9 -52.1L320.1 -50.1L315.3 -48.1L310.5 -46.1L305.6 -44.1L300.7 -42.1L295.7 -40.1Z"/><path d="M310.2 9.0L315.9 8.7L321.4 8.4L326.9 8.1L332.4 7.8L337.8 7.5L343.2 7.2L348.5 6.9L353.8 6.5L359.1 6.2L364.3 5.8L369.5 5.4L374.6 5.1L379.7 4.7L384.8 4.3L389.8 3.9L394.8 3.5L399.8 3.1L404.8 2.6L409.7 2.2L414.6 1.8L419.5 1.3L424.3 0.9L429.2 0.4L434.0 -0.0L438.8 -0.5L443.6 -0.9L448.4 -1.4L453.1 -1.9L457.9 -2.4L462.6 -2.9L467.4 -3.3L472.1 -3.8L476.8 -4.3L481.5 -4.8L486.3 -5.3L491.0 -5.8L495.7 -6.3L500.5 -6.8L505.2 -7.4L509.9 -7.9L514.7 -8.4L519.4 -8.9L524.2 -9.4L529.0 -9.9L533.8 -10.5L538.6 -11.0L543.5 -11.5L548.3 -12.0L547.7 -20.0L542.8 -19.8L538.0 -19.5L533.1 -19.3L528.3 -19.1L523.5 -18.8L518.7 -18.6L513.9 -18.4L509.1 -18.2L504.4 -17.9L499.6 -17.7L494.9 -17.5L490.1 -17.3L485.4 -17.1L480.6 -16.9L475.9 -16.7L471.2 -16.5L466.4 -16.3L461.7 -16.1L456.9 -15.9L452.2 -15.7L447.4 -15.5L442.6 -15.3L437.8 -15.2L433.0 -15.0L428.2 -14.8L423.4 -14.7L418.5 -14.5L413.6 -14.4L408.7 -14.2L403.8 -14.1L398.9 -14.0L393.9 -13.8L388.9 -13.7L383.9 -13.6L378.8 -13.5L373.8 -13.4L368.6 -13.3L363.5 -13.3L358.3 -13.2L353.1 -13.1L347.8 -13.1L342.5 -13.0L337.2 -13.0L331.8 -13.0L326.3 -13.0L320.9 -13.0L315.3 -13.0L309.8 -13.0Z"/><path d="M296.1 36.3L301.1 38.0L306.1 39.8L311.0 41.5L315.8 43.2L320.6 44.9L325.3 46.7L330.0 48.4L334.7 50.1L339.3 51.9L343.9 53.6L348.4 55.4L352.9 57.1L357.4 58.9L361.8 60.7L366.2 62.4L370.5 64.2L374.8 66.0L379.1 67.8L383.4 69.6L387.6 71.4L391.8 73.2L395.9 75.0L400.1 76.9L404.2 78.7L408.3 80.6L412.3 82.5L416.4 84.3L420.4 86.2L424.4 88.1L428.4 90.1L432.3 92.0L436.3 93.9L440.2 95.9L444.1 97.9L448.0 99.9L451.9 101.9L455.7 103.9L459.6 106.0L463.4 108.0L467.3 110.1L471.1 112.2L475.0 114.3L478.8 116.4L482.6 118.6L486.4 120.7L490.2 122.9L494.0 125.1L497.9 127.4L502.1 120.6L498.5 118.1L494.8 115.6L491.1 113.2L487.4 110.8L483.7 108.3L480.0 105.9L476.2 103.5L472.5 101.2L468.8 98.8L465.0 96.5L461.3 94.2L457.5 91.9L453.7 89.6L449.9 87.3L446.1 85.0L442.3 82.8L438.4 80.6L434.5 78.3L430.6 76.1L426.7 73.9L422.8 71.8L418.8 69.6L414.8 67.4L410.8 65.3L406.8 63.1L402.7 61.0L398.6 58.9L394.5 56.8L390.3 54.7L386.1 52.6L381.9 50.5L377.6 48.4L373.3 46.3L369.0 44.2L364.6 42.2L360.2 40.1L355.8 38.1L351.3 36.0L346.7 34.0L342.1 31.9L337.5 29.9L332.9 27.9L328.1 25.8L323.4 23.8L318.6 21.8L313.7 19.8L308.8 17.7L303.9 15.7Z"/><ellipse cx="397.67250000000007" cy="-78.20850000000002" rx="37.73" ry="12.862499999999999" transform="rotate(-78.24163671264455 397.67250000000007 -78.20850000000002) translate(25.724999999999998 0)"/><ellipse cx="397.67250000000007" cy="-78.20850000000002" rx="37.73" ry="12.862499999999999" transform="rotate(17.75836328735545 397.67250000000007 -78.20850000000002) translate(25.724999999999998 0)"/><ellipse cx="441.74464" cy="-105.90758400000001" rx="41.272" ry="14.069999999999999" transform="rotate(-82.44675661961503 441.74464 -105.90758400000001) translate(28.139999999999997 0)"/><ellipse cx="441.74464" cy="-105.90758400000001" rx="41.272" ry="14.069999999999999" transform="rotate(13.553243380384963 441.74464 -105.90758400000001) translate(28.139999999999997 0)"/><ellipse cx="478.36544" cy="-132.58406399999998" rx="44.352000000000004" ry="15.120000000000001" transform="rotate(-85.99933288687107 478.36544 -132.58406399999998) translate(30.240000000000002 0)"/><ellipse cx="478.36544" cy="-132.58406399999998" rx="44.352000000000004" ry="15.120000000000001" transform="rotate(10.000667113128927 478.36544 -132.58406399999998) translate(30.240000000000002 0)"/><ellipse cx="500" cy="-150" rx="50.599999999999994" ry="17.25" transform="rotate(0 500 -150) translate(26 0)"/><ellipse cx="421.90150000000006" cy="-6.765500000000001" rx="37.73" ry="12.862499999999999" transform="rotate(-51.56757989283016 421.90150000000006 -6.765500000000001) translate(25.724999999999998 0)"/><ellipse cx="421.90150000000006" cy="-6.765500000000001" rx="37.73" ry="12.862499999999999" transform="rotate(44.43242010716984 421.90150000000006 -6.765500000000001) translate(25.724999999999998 0)"/><ellipse cx="474.66009600000007" cy="-10.371072000000002" rx="41.272" ry="14.069999999999999" transform="rotate(-52.240690150301766 474.66009600000007 -10.371072000000002) translate(28.139999999999997 0)"/><ellipse cx="474.66009600000007" cy="-10.371072000000002" rx="41.272" ry="14.069999999999999" transform="rotate(43.759309849698234 474.66009600000007 -10.371072000000002) translate(28.139999999999997 0)"/><ellipse cx="520.217216" cy="-13.846912" rx="44.352000000000004" ry="15.120000000000001" transform="rotate(-52.44386361876341 520.217216 -13.846912) translate(30.240000000000002 0)"/><ellipse cx="520.217216" cy="-13.846912" rx="44.352000000000004" ry="15.120000000000001" transform="rotate(43.55613638123659 520.217216 -13.846912) translate(30.240000000000002 0)"/><ellipse cx="548" cy="-16" rx="50.599999999999994" ry="17.25" transform="rotate(0 548 -16) translate(26 0)"/><ellipse cx="397.67250000000007" cy="67.22900000000001" rx="37.73" ry="12.862499999999999" transform="rotate(-22.292973605200032 397.67250000000007 67.22900000000001) translate(25.724999999999998 0)"/><ellipse cx="397.67250000000007" cy="67.22900000000001" rx="37.73" ry="12.862499999999999" transform="rotate(73.70702639479997 397.67250000000007 67.22900000000001) translate(25.724999999999998 0)"/><ellipse cx="441.74464" cy="89.715456" rx="41.272" ry="14.069999999999999" transform="rotate(-19.365965338922514 441.74464 89.715456) translate(28.139999999999997 0)"/><ellipse cx="441.74464" cy="89.715456" rx="41.272" ry="14.069999999999999" transform="rotate(76.6340346610775 441.74464 89.715456) translate(28.139999999999997 0)"/><ellipse cx="478.36544" cy="110.651776" rx="44.352000000000004" ry="15.120000000000001" transform="rotate(-16.902533619889464 478.36544 110.651776) translate(30.240000000000002 0)"/><ellipse cx="478.36544" cy="110.651776" rx="44.352000000000004" ry="15.120000000000001" transform="rotate(79.09746638011053 478.36544 110.651776) translate(30.240000000000002 0)"/><ellipse cx="500" cy="124" rx="50.599999999999994" ry="17.25" transform="rotate(0 500 124) translate(26 0)"/></g>
+        <rect class="body" x="-600" y="-600" width="1400" height="1200" fill="url(#inkc0)" mask="url(#cutc0)"/>
+      </g>
+      <g mask="url(#carvec0)"><text x="100" y="58" text-anchor="middle" font-family="Aref Ruqaa" font-weight="700" font-size="250" fill="#0a0a0c">جذر</text></g>
+    </g></g></svg></span>
+    <label class="field"><input id="q" type="search" dir="rtl" lang="ar" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Taip perkataan Arab" aria-label="Taip perkataan Arab / Type an Arabic word">
+      <button class="clear" id="clear" type="button" aria-label="Kosongkan" hidden>×</button></label>
+  </div></header>
+  <main id="main"></main>
+  <footer id="foot"></footer>
+</div>
+<div class="page" id="page" hidden></div>
+<script>
+const ICON = document.querySelector('.ico').innerHTML;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ar = s => `<span class="ar">${esc(s)}</span>`;
+let IDX = null; const SHARDS = {};
+const DIA = /[ؐ-ًؚ-ٰٟۖ-ۭـ​-‏‪-‮⁦-⁩﻿]/g;
+const MAP = { 'ی': 'ي', 'ے': 'ي', 'ې': 'ي', 'ک': 'ك', 'ڪ': 'ك', 'ہ': 'ه', 'ھ': 'ه', 'ە': 'ه', 'ۀ': 'ة', 'ۃ': 'ة', 'ۓ': 'ئ', 'ٸ': 'ئ', 'ٶ': 'ؤ', 'ٵ': 'أ', 'ٲ': 'أ', 'ٳ': 'إ' };
+const canon = s => [...(s || '').normalize('NFKC')].map(c => MAP[c] ?? c).join('').replace(DIA, '').replace(/[^ء-ي]/g, '');
+const fold = s => s.replace(/[أإآٱ]/g, 'ا').replace(/[ؤئ]/g, 'ء');
+const key = s => fold(canon(s));
+
+function meaningLine(e, plural) {
+  if (e.ms) {
+    let ms = e.ms, extra = '';
+    if (plural && e.p === 'noun') {
+      const [w, ...rest] = ms.split(/(?=[ ;,])/);
+      if (!w.includes('-')) { extra = ` <small>tunggal: ${esc(ms)}</small>`; ms = `${w}-${w}${rest.join('')}`; }
+    }
+    return `<span class="ms">${esc(ms)}<span class="tag" title="Makna ini belum disemak oleh editor">draf</span>${extra}</span>`;
+  }
+  if (e.en) return `<span class="en"><span class="tag" style="margin:0 6px 0 0">EN</span>${esc(e.en)}</span>`;
+  return `<span class="none">Makna belum ada</span>`;
+}
+function labels(lab) {
+  return lab.map(x => x.startsWith('wazan @') ? 'wazan ' + ar(x.slice(7)) : x.startsWith('@') ? ar(x.slice(1)) : esc(x)).join(' · ');
+}
+
+function home() {
+  const m = IDX.meta;
+  $('#main').innerHTML = `
+    <section class="welcome"><span class="big" aria-hidden="true">${ICON}</span>
+      <h1>Jazar</h1><p>Kamus Arab–Melayu. Taip perkataan Arab tepat seperti dalam teks: dengan imbuhan, dengan atau tanpa baris.</p></section>
+    <div class="pad">
+      <div class="lab">Cuba perkataan ini · Try these</div>
+      <div class="chips">${m.suggest.map(w => `<button class="chip" data-q="${esc(w)}">${esc(w)}</button>`).join('')}</div>
+      <div class="note"><b>Demo bukti konsep · Proof of concept</b>
+        <span>Senarai perkataan tetap: ${m.queries.toLocaleString('en')} bentuk perkataan sekolah dan kata dasarnya. Makna Melayu ialah draf dan masih disemak.</span>
+        <span>A fixed list of ${m.queries.toLocaleString('en')} school word forms. Every result is precomputed by the real Jazar engine; Malay meanings are drafts still under review.</span></div>
+    </div>`;
+}
+
+function parts(r, typed) {   // the typed word, whole, each attached part in its own colour
+  const pre = r.parts.filter(p => p.r === 'p'), suf = r.parts.filter(p => p.r === 'x');
+  if (!pre.length && !suf.length) return '';
+  const c = canon(typed), k = fold(c), P = pre.map(p => p.t).join(''), X = suf.map(p => p.t).join('');
+  if (!k.startsWith(P) || !k.endsWith(X) || k.length <= P.length + X.length) return '';
+  let i = 0, html = '';
+  pre.forEach((p, n) => { html += `<span class="c${Math.min(n, 2)}">${esc(c.slice(i, i + p.t.length))}</span>`; i += p.t.length; });
+  html += `<span class="cs">${esc(c.slice(i, c.length - X.length))}</span>`;
+  if (X) html += `<span class="cx">${esc(c.slice(c.length - X.length))}</span>`;
+  const leg = [...pre.map((p, n) => [p, 'c' + Math.min(n, 2)]), ...suf.map(p => [p, 'cx'])]
+    .map(([p, cl]) => `<div><span>${esc(p.ms)} <small>· ${esc(p.en)}</small></span><span class="ar ${cl}">${esc(p.t)}</span></div>`).join('');
+  return `<div class="whole">${html}</div><div class="legend">${leg}</div>`;
+}
+
+function row(r, i) {
+  return `<button class="it" data-open="${i}"><div class="row">${meaningLine(r, r.pl)}<span class="hw">${esc(r.d)}</span></div>
+    <div class="sub"><span>${labels(r.lab)}</span>${r.form ? `<span class="mark">${esc(r.form)}</span>` : ''}</div></button>`;
+}
+
+let CURRENT = [];
+function show(text) {
+  const words = (text || '').trim().split(/\s+/).filter(w => canon(w));
+  $('#clear').hidden = !text;
+  const url = new URL(location.href);
+  if (words.length) url.searchParams.set('q', text.trim()); else url.searchParams.delete('q');
+  history.replaceState(history.state, '', url);
+  if (!words.length) return home();
+  const typed = words[0], k = key(typed), hit = IDX.q[k];
+  const many = words.length > 1 ? `<div class="help">Demo ini mencari satu perkataan sahaja: ${ar(typed)}. · One word at a time.</div>` : '';
+  if (!hit) {
+    $('#main').innerHTML = `<div class="pad">${many}
+      <div class="help">${ar(typed)} tiada dalam senarai demo.</div>
+      <div class="note"><b>Belum ada dalam demo ini · Not in this demo yet</b>
+        <span>Demo ini memuatkan ${IDX.meta.queries.toLocaleString('en')} perkataan tetap sahaja; aplikasi penuh mencari 2 juta bentuk perkataan.</span>
+        <span>This demo holds a fixed word list only; the full app searches 2 million word forms offline.</span></div>
+      <div class="lab">Cuba perkataan ini · Try these</div>
+      <div class="chips">${IDX.meta.suggest.map(w => `<button class="chip" data-q="${esc(w)}">${esc(w)}</button>`).join('')}</div></div>`;
+    return;
+  }
+  CURRENT = hit.r;
+  const main = CURRENT.filter(r => !r.fold), more = CURRENT.filter(r => r.fold);
+  const n = CURRENT.length;
+  $('#main').innerHTML = `<div class="pad">${many}${parts(CURRENT[0], typed)}
+      <div class="help">${n === 1 ? '1 bacaan' : n + ' bacaan'} untuk ${ar(typed)}${n > 1 ? '. Susunan ikut kemungkinan; pilih ikut makna.' : '.'}</div></div>
+    <div class="list">${main.map(r => row(r, CURRENT.indexOf(r))).join('')}</div>
+    ${more.length ? `<details class="more"><summary>Bacaan lain (${more.length}) ⌄</summary><div class="list">${more.map(r => row(r, CURRENT.indexOf(r))).join('')}</div></details>` : ''}`;
+}
+
+async function shard(id) {
+  const n = String(id % 32).padStart(2, '0');
+  if (!SHARDS[n]) SHARDS[n] = fetch(`data/s${n}.json`).then(r => r.json());
+  return SHARDS[n];
+}
+const SLOTS = { past: 'perf', pres: 'imperf', cmd: 'imper' };
+const ROWS = [['غائب', '3m', ['هُوَ', 'هُمَا', 'هُمْ']], ['غائبة', '3f', ['هِيَ', 'هُمَا', 'هُنَّ']], ['مخاطب', '2m', ['أَنْتَ', 'أَنْتُمَا', 'أَنْتُمْ']], ['مخاطبة', '2f', ['أَنْتِ', 'أَنْتُمَا', 'أَنْتُنَّ']]];
+function grid(t, title, small, arTitle, me, onlySecond) {
+  if (!t) return '';
+  const cell = (k, pr, span) => t[k] ? `<td${span ? ' colspan="2"' : ''} class="${t[k] === me ? 'me' : ''}"><small>${pr}</small><b>${esc(t[k])}</b></td>` : `<td${span ? ' colspan="2"' : ''}></td>`;
+  let rows = ROWS.filter(([, k]) => !onlySecond || k[0] === '2').map(([lab, k, pr]) => {
+    const du = k[0] === '2' ? '2cdu' : k + 'du';
+    return `<tr><td class="r">${lab}</td>${cell(k + 'sg', pr[0])}${cell(du, pr[1])}${cell(k + 'pl', pr[2])}</tr>`;
+  }).join('');
+  if (!onlySecond) rows += `<tr><td class="r">متكلم</td>${cell('1csg', 'أَنَا')}${cell('1cpl', 'نَحْنُ', true)}</tr>`;
+  return `<div class="grid"><h3><span>${title} <small>${small}</small></span><span class="ar">${arTitle}</span></h3>
+    <table><thead><tr><th></th><th>مفرد</th><th>مثنى</th><th>جمع</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function lit(word, root) {   // kata dasar letters stay black, the rest grey
+  const R = [...fold(root || '')]; let k = 0;
+  return (word.match(/.[ً-ٰٟ]*/gu) || []).map(c => (k < R.length && fold(c[0]) === R[k]) ? (k++, `<b>${esc(c)}</b>`) : esc(c)).join('');
+}
+
+const STACK = [];
+async function openEntry(id, ctx, push = true) {
+  const s = await shard(id); const e = s.e[id];
+  if (!e) return;
+  const fam = e.rid != null ? (await shard(e.rid)).f[e.rid] : null;
+  if (push) { STACK.push({ id, ctx }); history.pushState({ depth: STACK.length }, ''); }
+  render(id, e, fam, ctx, 0);
+}
+function render(id, e, fam, ctx, tab) {
+  const isVerb = e.pos === 'verb';
+  const tabs = ['Makna', isVerb ? 'Tasrif' : 'Bentuk', 'Kaitan'];
+  const pos = [esc(e.kind) + (e.pat ? ' · ' + (e.vfI ? '' : 'wazan ') + ar(e.pat) : ''), e.trans ? esc(e.trans) : ''].filter(Boolean).map(x => `<span>${x}</span>`).join('');
+  let body = '';
+  if (tab === 0) {
+    const typed = ctx && ctx.form && ctx.form !== e.d ? `<div class="typed">Anda taip <span class="mark">${esc(ctx.form)}</span> <span>${labels(ctx.lab)}</span></div>` : '';
+    const ms = e.ms.map((m, i) => `<div class="mbox"><div class="r1"><span class="n">${i + 1}</span><span class="w">${esc(m.ms)}</span><span class="tag" title="Makna ini belum disemak oleh editor">draf</span></div>
+        ${m.more ? `<div class="s">juga: ${esc(m.more)}</div>` : ''}${m.en ? `<div class="s">EN · ${esc(m.en)}</div>` : ''}</div>`).join('');
+    const en = !e.ms.length && e.en.length ? e.en.map((g, i) => `<div class="mbox"><div class="r1"><span class="n">${i + 1}</span><span class="tag" style="margin:0">EN</span><span class="w e">${esc(g)}</span></div></div>`).join('') : '';
+    const enMore = e.ms.length && e.en.length ? `<div class="lab">English</div><div class="help">${e.en.map(esc).join(' · ')}</div>` : '';
+    const root = e.root ? `<div class="lab">Kata dasar · root</div><div class="tiles">${[...e.root].map(c => `<span>${esc(c)}</span>`).join('')}</div>` : '';
+    body = `<div class="pad">${typed}${ms}${en}${!ms && !en ? '<div class="help">Makna belum ada dalam demo ini.</div>' : ''}${enMore}${root}</div>`;
+  } else if (tab === 1 && isVerb) {
+    const t = e.tasrif || {}, me = ctx && ctx.form;
+    body = `<div class="pad"><div class="help">Tasrif asas: madhi, mudhari' dan amar (ma'lum).</div>
+      ${grid(t.perf, 'Madhi', 'lampau', 'الماضي', me)}${grid(t.imperf, "Mudhari'", 'kini', 'المضارع', me)}${grid(t.imper, 'Amar', 'suruhan', 'الأمر', me, true)}
+      ${!e.tasrif ? '<div class="help">Tasrif tiada untuk kata ini.</div>' : ''}</div>`;
+  } else if (tab === 1) {
+    const f = e.forms || [];
+    body = f.length ? `<div class="list forms">${f.map(([l, d]) => `<div class="it"><div class="row"><span class="ms" style="font-size:15px;font-weight:600">${esc(l)}</span><span class="hw">${esc(d)}</span></div></div>`).join('')}</div>`
+      : `<div class="pad"><div class="help">Tiada bentuk lain dalam demo ini.</div></div>`;
+  } else {
+    body = fam && fam.length ? fam.map(([g, items]) => `<div class="grp">${esc(g)}</div><div class="list k">${items.map(x => {
+        const m = x.ms ? `<span class="ms">${esc(x.ms)}</span>` : x.en ? `<span class="en">${esc(x.en)}</span>` : '';
+        return `<button class="it" data-fam="${x.id}"${x.id == id ? ' disabled' : ''}><div class="row"><span>${m}${x.pat ? ` <span class="sm">· ${x.id && x.pat ? ar(x.pat) : ''}</span>` : ''}</span><span class="hw">${lit(x.d, e.root)}</span></div></button>`;
+      }).join('')}</div>`).join('') : `<div class="pad"><div class="help">Tiada kata dasar untuk kata ini.</div></div>`;
+  }
+  const pg = $('#page');
+  pg.hidden = false;
+  pg.innerHTML = `<div class="app"><header class="top"><div class="bar"><button class="back" id="back" aria-label="Kembali">←</button><span class="ttl">${esc(e.d)}</span></div></header>
+    <div class="hd"><span class="pos">${pos}</span><span class="word">${esc(e.d)}</span></div>
+    <div class="tabs">${tabs.map((t, i) => `<button data-tab="${i}" class="${i === tab ? 'on' : ''}">${t}</button>`).join('')}</div>
+    ${body}</div>`;
+  pg.scrollTop = 0;
+  pg.onclick = ev => {
+    const b = ev.target.closest('button'); if (!b) return;
+    if (b.id === 'back') return history.back();
+    if (b.dataset.tab) return render(id, e, fam, ctx, +b.dataset.tab);
+    if (b.dataset.fam) return openEntry(+b.dataset.fam, null);
+  };
+}
+addEventListener('popstate', () => {
+  STACK.pop();
+  const top = STACK[STACK.length - 1];
+  if (top) openEntry(top.id, top.ctx, false); else { $('#page').hidden = true; $('#page').innerHTML = ''; }
+});
+
+document.addEventListener('click', ev => {
+  const c = ev.target.closest('[data-q]');
+  if (c) { $('#q').value = c.dataset.q; show(c.dataset.q); scrollTo(0, 0); return; }
+  const o = ev.target.closest('[data-open]');
+  if (o) { const r = CURRENT[+o.dataset.open]; openEntry(r.id, r); }
+});
+$('#q').addEventListener('input', e => show(e.target.value));
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
+$('#clear').addEventListener('click', () => { $('#q').value = ''; show(''); $('#q').focus(); });
+
+$('#foot').innerHTML = `<div><b>Jazar</b> · kamus Arab–Melayu luar talian (offline Arabic–Malay dictionary). Demo bukti konsep, November 2026.</div>
+  <div>Kredit · Credits: English meanings from CAMeL-Morph (CC BY 4.0) and English Wiktionary via kaikki.org (CC BY-SA 4.0). Some plural forms from English Wiktionary (CC BY-SA 4.0) and Qabas, SinaLab, Birzeit University (CC BY). Fonts: Amiri, Noto Naskh Arabic, Aref Ruqaa, Plus Jakarta Sans (SIL Open Font License).</div>
+  <div>The word data on this page is shared under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Malay meanings are drafts by the Jazar team, under review.</div>`;
+
+fetch('data/index.json').then(r => r.json()).then(d => {
+  IDX = d;
+  const q0 = new URL(location.href).searchParams.get('q') || '';
+  $('#q').value = q0; show(q0);
+});
+</script>
+</body>
+</html>
