@@ -2,8 +2,9 @@
 <html lang="ms">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jazar App Mockup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<title>Jazar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@700&family=Noto+Naskh+Arabic:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -284,13 +285,19 @@ body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--font-ui)
 .k .row{align-items:center}
 :focus-visible{outline:.5cqw solid var(--a-ink);outline-offset:.4cqw}
 @media (prefers-reduced-motion:no-preference){ .it,.tabs button,.chev svg{transition:background-color .12s,transform .15s} }
+/* ── full-screen app (no phone frame) ── */
+html,body{height:100%}
+body{background:var(--bg);overflow:hidden}
+.app{container-type:inline-size;width:100%;max-width:480px;margin:0 auto;height:100vh;height:100dvh;background:var(--a-page);
+  box-shadow:0 0 0 1px var(--line)}
+.sc{height:100%;border-radius:0}
+.top{padding-top:env(safe-area-inset-top)}
+.kb{padding-bottom:calc(3cqw + env(safe-area-inset-bottom))}
+.cue .ms{white-space:normal}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="ph"><div class="sc" id="sc"></div></div>
-  <p class="caption"><b>Mockup Jazar.</b> Data contoh daripada pangkalan data percubaan; makna Melayu masih draf. Glosari Inggeris daripada Wiktionary (CC BY-SA 4.0).</p>
-  <div class="cues" id="cues"></div>
+<div class="app"><div class="sc" id="sc"></div></div>
 </div>
 
 <script>
@@ -399,7 +406,7 @@ const setUi = (p, key, val) => { p.ui[key] = val; paint(); };
 const home = () => { stack.length = 1; paint(); };
 
 /* ── chrome ──────────────────────────────────────────────────────── */
-const status = `<div class="st"><span>9:41</span><span>5G</span></div>`;
+const status = '';
 const themeIcon = () => document.documentElement.dataset.theme === 'dark'
   ? `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.6v2.6M12 18.8v2.6M2.6 12h2.6M18.8 12h2.6M5.4 5.4l1.8 1.8M16.8 16.8l1.8 1.8M18.6 5.4l-1.8 1.8M7.2 16.8l-1.8 1.8"/></g></svg>`
   : `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.4A8.4 8.4 0 0 1 9.6 4 8.6 8.6 0 1 0 20 14.4Z" fill="currentColor"/></svg>`;
@@ -447,7 +454,7 @@ const sheet = () => menuOpen ? `<div class="sheet" data-menu-close><div class="p
     <button class="opt" type="button" data-theme-toggle><span>Mod gelap</span><small>${document.documentElement.dataset.theme === 'dark' ? 'Hidup' : 'Mati'}</small></button>
     <button class="opt" type="button"><span>Bahasa makna</span><small>Melayu</small></button>
     <button class="opt" type="button"><span>Senarai disimpan</span><small>0</small></button>
-    <div class="about">Kamus Arab–Melayu luar talian. Cari perkataan Arab tepat seperti yang anda lihat.</div></div></div>` : '';
+    <div class="about">Kamus Arab–Melayu luar talian. Cari perkataan Arab tepat seperti yang anda lihat.<br><br>Demo: makna Melayu masih draf dan sedang disemak. Glosari Inggeris daripada Wiktionary (CC BY-SA 4.0).</div></div></div>` : '';
 const barHome = () => `<div class="top">${status}<div class="bar"><span class="ttl ui">Jazar</span>${themeBtn}</div></div>`;
 const barWord = t => `<div class="top">${status}<div class="bar"><button class="back" type="button" data-back aria-label="Kembali">←</button><span class="ttl">${esc(t)}</span></div></div>`;
 
@@ -458,8 +465,8 @@ function homeBody(){
       <h1>Selamat datang ke Jazar</h1>
       <p>Cari apa sahaja perkataan Arab, tepat seperti yang anda lihat.</p>
       <span class="hint">Baris tidak wajib. Tiada papan kekunci Arab? Tekan ikon papan kekunci.</span></div>
-    <div class="pad"><div class="lab" style="text-align:center">CUBA PERKATAAN INI</div>
-      <div class="chips">${CUES.map(q => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div></div>
+    <div class="pad"><div class="lab">CUBA PERKATAAN INI</div></div>
+    <div class="list">${CUES.map(([q, ms]) => `<div class="it cue" data-q="${esc(q)}" role="button" tabindex="0"><span class="row"><span class="ms">${esc(ms)}</span><span class="hw">${esc(q)}</span></span></div>`).join('')}</div>
     ${recent.length ? `<div class="pad"><div class="lab">BARU DICARI</div></div><div class="list">${recent.map(q => `<div class="it" data-q="${esc(q)}" role="button" tabindex="0"><span class="row"><span class="ms0">Carian</span><span class="hw">${esc(q)}</span></span></div>`).join('')}</div>` : ''}`;
 }
 
@@ -827,12 +834,7 @@ function rowFor(q, id){
 }
 
 /* the cues: only words that have a Malay meaning, plus the no-match one */
-CUES = ["وسيكتبونها", "المدرسة", "يغلي", "الزبائن", "بيت", "يكتبون", "عشرين", "قطة"];
-document.getElementById('cues').innerHTML = CUES.map(q => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('');
-document.getElementById('cues').addEventListener('click', ev => {
-  const b = ev.target.closest('button'); if (!b) return;
-  stack.length = 1; go({ k:'results', q: b.dataset.q, title: b.dataset.q });
-});
+CUES = [["وسيكتبونها", "dan akan menulisnya"], ["المدرسة", "sekolah itu"], ["يغلي", "mendidih"], ["الزبائن", "pelanggan-pelanggan"], ["بيت", "rumah"], ["قطة", "kucing"], ["عشرين", "dua puluh"], ["يكتبون", "mereka menulis"]];
 try { if (matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.dataset.theme) document.documentElement.dataset.theme = 'dark'; } catch (e) {}
 paint();
 </script>
