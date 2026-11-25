@@ -494,7 +494,7 @@ function formCat(r){
   if (r.cell && r.cell.aspect) return TENSE[r.cell.aspect];
   if (r.plural) return 'jamak';
   if (r.dual) return 'muthanna';
-  if (r.cell && r.cell.gender === 'f') return 'muannas';
+  if (r.fem || (r.cell && r.cell.gender === 'f' && !r.cell.aspect)) return 'muannas';
   return '';
 }
 function rowHtml(r, i, opts){
@@ -590,6 +590,7 @@ function explain(r, e){
     why = TENSE[c.aspect] + (PRN[k] ? ' · ' + ar(PRN[k]) : '') + ' · daripada ' + ar(e.d);
   } else if (r.plural){ why = 'Jamak daripada ' + ar(e.d); }
   else if (r.dual){ say = 'dua ' + ms; why = 'Muthanna daripada ' + ar(e.d); }
+  else if (r.fem){ why = 'Muannas daripada ' + ar(e.d); }
   return `<div class="pad"><div class="lab">ANDA TAIP</div><div class="explain">
       <div class="top2"><span class="form" style="font-size:7cqw">${esc(r.form)}</span><span class="eq">=</span><span class="say">${esc(say)}</span></div>
       ${why ? `<div class="why">${why}</div>` : ''}</div></div>`;
@@ -633,7 +634,8 @@ function tasrifTab(page){
   const e = E[page.lid];
   if (e.pos !== 'verb') return bentukTab(page);
   const me = page.row && page.row.form;
-  const view = page.ui.view || 'asas';
+  const rc = page.row && page.row.cell;
+  const view = page.ui.view || (rc && rc.voice === 'pass' ? 'majhul' : rc && ['sub', 'jus'].includes(rc.mood) ? 'irab' : 'asas');
   const v = VIEWS.find(x => x.k === view) || VIEWS[0];
   let cells = [];
   if (view === 'asas') cells = [
@@ -673,7 +675,8 @@ const FEM_SAMPLE = { 'زَبُونٌ': ['زَبُونَةٌ', 'زَبُونَت�
 function bentukTab(page){
   const e = E[page.lid];
   const fs = e.forms || [];
-  const plain = (g, n) => fs.find(x => x.gender === g && x.number === n && x.case_ === 'nom' && x.state === 'indef');
+  const plain = (g, n) => fs.find(x => x.gender === g && x.number === n && x.case_ === 'nom' && x.state === 'indef')
+    || fs.find(x => x.gender === g && x.number === n && !x.case_ && !x.state);
   const pls = fs.filter(x => x.number === 'pl' && (!x.case_ || x.case_ === 'nom') && x.state !== 'constr' && (!x.gender || x.gender === 'm'));
   const m = [e.d, (plain('m', 'du') || {}).d, pls.map(x => x.d)];
   const fem = FEM_SAMPLE[e.d] || ['sg', 'du', 'pl'].map(n => (plain('f', n) || {}).d);
